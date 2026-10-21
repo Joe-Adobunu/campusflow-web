@@ -1,99 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>CampusFlow</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
-    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
-    th { background: #f4f4f4; }
-    .critical { color: #b00020; font-weight: bold; }
-    .high { color: #d35400; }
-    .medium { color: #b8860b; }
-    .low { color: #2e7d32; }
-    form { margin: 1rem 0; padding: 1rem; background: #fafafa; border: 1px solid #eee; }
-    input, select, button { padding: 0.4rem; margin: 0.2rem; }
+    /* Modern Reset & Base Styles */
+    * { box-sizing: border-box; }
+    body { 
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      background-color: #f3f4f6; 
+      color: #1f2937;
+      margin: 0; 
+      padding: 2rem 1rem; 
+      line-height: 1.5;
+    }
+
+    /* Card Container */
+    .container {
+      max-width: 1000px; 
+      margin: 0 auto; 
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Typography */
+    h1 { color: #111827; margin-top: 0; font-size: 2.5rem; letter-spacing: -0.025em; }
+    h2 { color: #374151; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-top: 2.5rem; }
+
+    /* Forms & Inputs */
+    form { 
+      display: flex; 
+      gap: 0.75rem; 
+      flex-wrap: wrap; 
+      background: #f9fafb; 
+      padding: 1.5rem; 
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+    input, select { 
+      padding: 0.6rem; 
+      border: 1px solid #d1d5db; 
+      border-radius: 6px; 
+      font-size: 1rem; 
+      outline: none;
+    }
+    input:focus, select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+
+    /* Buttons */
+    button { 
+      padding: 0.6rem 1.2rem; 
+      background-color: #2563eb; 
+      color: white; 
+      border: none; 
+      border-radius: 6px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: background 0.2s;
+    }
+    button:hover { background-color: #1d4ed8; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.95rem; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    th { background-color: #f9fafb; font-weight: 600; color: #4b5563; }
+    tr:hover { background-color: #f9fafb; }
+
+    /* Priority Badges */
+    .critical, .high, .medium, .low { 
+      font-weight: bold; 
+      padding: 0.2rem 0.6rem; 
+      border-radius: 999px; 
+      font-size: 0.85rem; 
+      display: inline-block;
+    }
+    .critical { color: #991b1b; background-color: #fee2e2; }
+    .high { color: #9a3412; background-color: #ffedd5; }
+    .medium { color: #854d0e; background-color: #fef08a; }
+    .low { color: #166534; background-color: #dcfce7; }
+    
+    /* Inline Forms in Table */
+    td form { padding: 0; background: transparent; border: none; gap: 0.5rem; }
+    td input { padding: 0.3rem; font-size: 0.85rem; }
+    td button { padding: 0.3rem 0.6rem; font-size: 0.85rem; background-color: #4b5563; }
+    td button:hover { background-color: #374151; }
   </style>
 </head>
-<body>
-  <h1>CampusFlow</h1>
-
-  <h2>Create a ticket</h2>
-  <form method="post" action="/create">
-    <input name="title" placeholder="Title" required>
-    <select name="category">
-      <option>Network</option><option>Hardware</option>
-      <option>Software</option><option>Other</option>
-    </select>
-    <select name="urgency">
-      <option>low</option><option>medium</option><option>high</option>
-    </select>
-    <input name="affected_users" type="number" min="1" placeholder="Users" required>
-    <button type="submit">Create</button>
-  </form>
-
-  <h2>Work queue (unresolved)</h2>
-  {% if queue %}
-    <table>
-      <tr><th>Priority</th><th>ID</th><th>Title</th><th>Status</th></tr>
-      {% for t in queue %}
-        <tr>
-          <td class="{{ t.priority }}">{{ t.priority }}</td>
-          <td>{{ t.id }}</td>
-          <td>{{ t.title }}</td>
-          <td>{{ t.status }}</td>
-        </tr>
-      {% endfor %}
-    </table>
-  {% else %}
-    <p>Nothing waiting.</p>
-  {% endif %}
-
-  <h2>All tickets</h2>
-  {% if tickets %}
-    <table>
-      <tr>
-        <th>ID</th><th>Title</th><th>Category</th><th>Urgency</th>
-        <th>Users</th><th>Priority</th><th>Status</th><th>Assigned</th>
-        <th>Actions</th>
-      </tr>
-      {% for t in tickets %}
-        <tr>
-          <td>{{ t.id }}</td>
-          <td>{{ t.title }}</td>
-          <td>{{ t.category }}</td>
-          <td>{{ t.urgency }}</td>
-          <td>{{ t.affected_users }}</td>
-          <td class="{{ t.priority }}">{{ t.priority }}</td>
-          <td>{{ t.status }}</td>
-          <td>{{ t.assigned_to or "—" }}</td>
-          <td>
-            <form method="post" action="/assign/{{ t.id }}" style="display:inline">
-              <input name="staff_name" placeholder="Staff name" size="10" required>
-              <button type="submit">Assign</button>
-            </form>
-            <form method="post" action="/status/{{ t.id }}" style="display:inline">
-              <select name="new_status">
-                <option>in_progress</option><option>resolved</option>
-              </select>
-              <button type="submit">Update</button>
-            </form>
-          </td>
-        </tr>
-      {% endfor %}
-    </table>
-  {% else %}
-    <p>No tickets yet.</p>
-  {% endif %}
-
-  <h2>Report</h2>
-  <p>Total: {{ report.total }}</p>
-  <p>By status:
-    {% for s, c in report.by_status.items() %}{{ s }}: {{ c }} {% endfor %}
-  </p>
-  <p>By priority:
-    {% for p, c in report.by_priority.items() %}{{ p }}: {{ c }} {% endfor %}
-  </p>
-</body>
-</html>
