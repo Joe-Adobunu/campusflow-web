@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>CampusFlow</title>
@@ -85,3 +87,86 @@
     td button:hover { background-color: #374151; }
   </style>
 </head>
+<body>
+  <div class="container">
+    <h1>CampusFlow</h1>
+
+    <h2>Create a ticket</h2>
+    <form method="post" action="/create">
+      <input name="title" placeholder="Title" required>
+      <select name="category">
+        <option>Network</option><option>Hardware</option>
+        <option>Software</option><option>Other</option>
+      </select>
+      <select name="urgency">
+        <option>low</option><option>medium</option><option>high</option>
+      </select>
+      <input name="affected_users" type="number" min="1" placeholder="Users" required>
+      <button type="submit">Create</button>
+    </form>
+
+    <h2>Work queue (unresolved)</h2>
+    {% if queue %}
+      <table>
+        <tr><th>Priority</th><th>ID</th><th>Title</th><th>Status</th></tr>
+        {% for t in queue %}
+          <tr>
+            <td><span class="{{ t.priority }}">{{ t.priority }}</span></td>
+            <td>{{ t.id }}</td>
+            <td>{{ t.title }}</td>
+            <td>{{ t.status }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>Nothing waiting.</p>
+    {% endif %}
+
+    <h2>All tickets</h2>
+    {% if tickets %}
+      <table>
+        <tr>
+          <th>ID</th><th>Title</th><th>Category</th><th>Urgency</th>
+          <th>Users</th><th>Priority</th><th>Status</th><th>Assigned</th>
+          <th>Actions</th>
+        </tr>
+        {% for t in tickets %}
+          <tr>
+            <td>{{ t.id }}</td>
+            <td>{{ t.title }}</td>
+            <td>{{ t.category }}</td>
+            <td>{{ t.urgency }}</td>
+            <td>{{ t.affected_users }}</td>
+            <td><span class="{{ t.priority }}">{{ t.priority }}</span></td>
+            <td>{{ t.status }}</td>
+            <td>{{ t.assigned_to or "—" }}</td>
+            <td>
+              <form method="post" action="/assign/{{ t.id }}" style="display:inline">
+                <input name="staff_name" placeholder="Staff name" size="10" required>
+                <button type="submit">Assign</button>
+              </form>
+              <form method="post" action="/status/{{ t.id }}" style="display:inline">
+                <select name="new_status">
+                  <option>in_progress</option><option>resolved</option>
+                </select>
+                <button type="submit">Update</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>No tickets yet.</p>
+    {% endif %}
+
+    <h2>Report</h2>
+    <p><strong>Total:</strong> {{ report.total }}</p>
+    <p><strong>By status:</strong>
+      {% for s, c in report.by_status.items() %}{{ s }}: {{ c }} &nbsp;{% endfor %}
+    </p>
+    <p><strong>By priority:</strong>
+      {% for p, c in report.by_priority.items() %}{{ p }}: {{ c }} &nbsp;{% endfor %}
+    </p>
+  </div>
+</body>
+</html>
